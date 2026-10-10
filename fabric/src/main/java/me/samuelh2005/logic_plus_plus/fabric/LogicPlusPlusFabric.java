@@ -3,6 +3,8 @@ package me.samuelh2005.logic_plus_plus.fabric;
 import net.fabricmc.api.ModInitializer;
 
 import me.samuelh2005.logic_plus_plus.LogicPlusPlus;
+import me.samuelh2005.logic_plus_plus.fabric.systems.ValueSourceProviderImpl;
+import me.samuelh2005.logic_plus_plus.foundation.ModBlockEntities;
 
 public final class LogicPlusPlusFabric implements ModInitializer {
     @Override
@@ -13,5 +15,15 @@ public final class LogicPlusPlusFabric implements ModInitializer {
 
         // Run our common setup.
         LogicPlusPlus.init();
+
+        ValueSourceProviderImpl.VALUE_SOURCE.registerForBlockEntity(
+            (be, side) -> be.getValueOutput(),
+            ModBlockEntities.COUNTER.get()
+        );
+
+        ValueSourceProviderImpl.VALUE_SOURCE.registerForBlockEntity(
+            (be, side) -> be.getValueOutput(),
+            ModBlockEntities.DIGITAL_CABLE.get()
+        );
     }
 }

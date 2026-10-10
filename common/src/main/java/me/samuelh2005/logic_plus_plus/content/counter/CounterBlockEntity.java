@@ -1,6 +1,7 @@
 package me.samuelh2005.logic_plus_plus.content.counter;
 
 import me.samuelh2005.logic_plus_plus.foundation.ModBlockEntities;
+import me.samuelh2005.logic_plus_plus.systems.ValueSource;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
@@ -38,5 +39,9 @@ public class CounterBlockEntity extends BlockEntity {
     public void onSignal(boolean signal) {
         count++;
         setChanged();
+    }
+
+    public ValueSource getValueOutput() {
+        return new ValueSource(count);
     }
 }
