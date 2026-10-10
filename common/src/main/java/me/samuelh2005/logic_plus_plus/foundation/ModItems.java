@@ -11,8 +11,8 @@ public final class ModItems {
     public static final DeferredRegister<Item> ITEMS =
             DeferredRegister.create(LogicPlusPlus.MOD_ID, Registries.ITEM);
 
-    public static final RegistrySupplier<Item> EXAMPLE_BLOCK_ITEM = ITEMS.register("example_block",
-            () -> new BlockItem(ModBlocks.EXAMPLE_BLOCK.get(),
+    public static final RegistrySupplier<Item> COUNTER = ITEMS.register("counter",
+            () -> new BlockItem(ModBlocks.COUNTER.get(),
                     new Item.Properties().arch$tab(ModCreativeTabs.MAIN)));
 
     public static void register() { ITEMS.register(); }

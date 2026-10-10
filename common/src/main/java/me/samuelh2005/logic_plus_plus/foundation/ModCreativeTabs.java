@@ -16,7 +16,7 @@ public final class ModCreativeTabs {
     public static final RegistrySupplier<CreativeModeTab> MAIN = TABS.register("main",
             () -> CreativeTabRegistry.create(
                     Component.translatable("itemGroup." + LogicPlusPlus.MOD_ID + ".main"),
-                    () -> new ItemStack(ModItems.EXAMPLE_BLOCK_ITEM.get())));
+                    () -> new ItemStack(ModItems.COUNTER.get())));
 
     public static void register() { TABS.register(); }
 }
