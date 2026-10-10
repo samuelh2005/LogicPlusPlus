@@ -88,4 +88,17 @@ public class CounterBlock extends BaseEntityBlock {
             level.setBlock(pos, state.setValue(TRIGGERED, false), Block.UPDATE_CLIENTS);
         }
     }
+
+    @Override
+    public boolean hasAnalogOutputSignal(BlockState state) {
+        return true;
+    }
+
+    @Override
+    public int getAnalogOutputSignal(BlockState state, Level level, BlockPos pos) {
+        if (level.getBlockEntity(pos) instanceof CounterBlockEntity counter) {
+            return counter.getCount();
+        }
+        return 0;
+    }
 }
