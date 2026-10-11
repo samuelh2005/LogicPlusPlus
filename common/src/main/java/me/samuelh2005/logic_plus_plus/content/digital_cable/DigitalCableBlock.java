@@ -3,11 +3,8 @@ package me.samuelh2005.logic_plus_plus.content.digital_cable;
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Maps;
 import com.mojang.serialization.MapCodec;
 
 import me.samuelh2005.logic_plus_plus.foundation.ModBlocks;
@@ -28,39 +25,35 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
-import net.minecraft.world.level.block.state.properties.EnumProperty;
+import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.Property;
-import net.minecraft.world.level.block.state.properties.RedstoneSide;
 
 public class DigitalCableBlock extends BaseEntityBlock {
     private static final int MAX_NETWORK = 256;
 
     public static final MapCodec<DigitalCableBlock> CODEC = simpleCodec(DigitalCableBlock::new);
-    public static final EnumProperty<RedstoneSide> NORTH = BlockStateProperties.NORTH_REDSTONE;
-    public static final EnumProperty<RedstoneSide> EAST = BlockStateProperties.EAST_REDSTONE;
-    public static final EnumProperty<RedstoneSide> SOUTH = BlockStateProperties.SOUTH_REDSTONE;
-    public static final EnumProperty<RedstoneSide> WEST = BlockStateProperties.WEST_REDSTONE;
-    public static final Map<Direction, EnumProperty<RedstoneSide>> PROPERTY_BY_DIRECTION = Maps.newEnumMap(ImmutableMap.of(
-        Direction.NORTH, NORTH,
-        Direction.EAST, EAST,
-        Direction.SOUTH, SOUTH,
-        Direction.WEST, WEST
-    ));
+    public static final BooleanProperty NORTH = BlockStateProperties.NORTH;
+    public static final BooleanProperty EAST = BlockStateProperties.EAST;
+    public static final BooleanProperty SOUTH = BlockStateProperties.SOUTH;
+    public static final BooleanProperty WEST = BlockStateProperties.WEST;
+    public static final BooleanProperty UP = BlockStateProperties.UP;
+    public static final BooleanProperty DOWN = BlockStateProperties.DOWN;
 
     public DigitalCableBlock(Properties properties) {
         super(properties);
         registerDefaultState(stateDefinition.any()
-            .setValue(NORTH, RedstoneSide.NONE)
-            .setValue(EAST, RedstoneSide.NONE)
-            .setValue(SOUTH, RedstoneSide.NONE)
-            .setValue(WEST, RedstoneSide.NONE)
-
+            .setValue(NORTH, false)
+            .setValue(EAST, false)
+            .setValue(SOUTH, false)
+            .setValue(WEST, false)
+            .setValue(UP, false)
+            .setValue(DOWN, false)
         );
     }
 
     @Override
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
-        builder.add(new Property[]{NORTH, EAST, SOUTH, WEST});
+        builder.add(new Property[]{NORTH, EAST, SOUTH, WEST, UP, DOWN});
     }
 
     @Override
@@ -75,8 +68,19 @@ public class DigitalCableBlock extends BaseEntityBlock {
     @Override
     protected RenderShape getRenderShape(BlockState state) { return RenderShape.MODEL; }
 
-    private static RedstoneSide connection(BlockState neighbor) {
-        return neighbor.is(ModTags.DIGITAL_BLOCKS) ? RedstoneSide.SIDE : RedstoneSide.NONE;
+    private static boolean connection(BlockState neighbor) {
+        return neighbor.is(ModTags.DIGITAL_BLOCKS);
+    }
+
+    private static BooleanProperty getPropertyForDirection(Direction dir) {
+        return switch (dir) {
+            case NORTH -> NORTH;
+            case EAST -> EAST;
+            case SOUTH -> SOUTH;
+            case WEST -> WEST;
+            case UP -> UP;
+            case DOWN -> DOWN;
+        };
     }
 
     @Override
@@ -84,19 +88,20 @@ public class DigitalCableBlock extends BaseEntityBlock {
         Level level = ctx.getLevel();
         BlockPos pos = ctx.getClickedPos();
         BlockState state = defaultBlockState();
-        for (Direction dir : Direction.Plane.HORIZONTAL) {
-            state = state.setValue(PROPERTY_BY_DIRECTION.get(dir),
-                    connection(level.getBlockState(pos.relative(dir))));
+
+        for (Direction dir : Direction.values()) {
+            BlockPos neighborPos = pos.relative(dir);
+            BlockState neighborState = level.getBlockState(neighborPos);
+            state = state.setValue(getPropertyForDirection(dir), connection(neighborState));
         }
+
         return state;
     }
 
     @Override
     protected BlockState updateShape(BlockState state, Direction dir, BlockState neighborState,
                                     LevelAccessor level, BlockPos pos, BlockPos neighborPos) {
-        if (dir.getAxis().isHorizontal()) {
-            return state.setValue(PROPERTY_BY_DIRECTION.get(dir), connection(neighborState));
-        }
+        state = state.setValue(getPropertyForDirection(dir), connection(neighborState));
         return state;
     }
 
@@ -122,10 +127,18 @@ public class DigitalCableBlock extends BaseEntityBlock {
 
         while (!queue.isEmpty()) {
             BlockPos current = queue.poll();
-            for (Direction dir : Direction.Plane.HORIZONTAL) {
+            BlockState currentState = level.getBlockState(current);
+
+            for (Direction dir : Direction.values()) {
+                // This side of the cable is disconnected: don't traverse or read through it
+                if (!currentState.getValue(getPropertyForDirection(dir))) continue;
+
                 BlockPos next = current.relative(dir);
                 BlockState nextState = level.getBlockState(next);
+
                 if (nextState.is(ModBlocks.DIGITAL_CABLE.get())) {
+                    // Both cables must agree the link exists
+                    if (!nextState.getValue(getPropertyForDirection(dir.getOpposite()))) continue;
                     if (network.size() < MAX_NETWORK && network.add(next)) queue.add(next);
                 } else if (nextState.is(ModTags.DIGITAL_BLOCKS)) {
                     ValueSource src = ValueSourceProvider.find(level, next, dir.getOpposite());
@@ -137,8 +150,11 @@ public class DigitalCableBlock extends BaseEntityBlock {
         for (BlockPos p : network) {
             if (level.getBlockEntity(p) instanceof DigitalCableBlockEntity cable && cable.getValue() != value) {
                 cable.setValue(value);
-                // Tell only non-cable neighbours (gates etc.); cables are already handled by this flood fill
-                for (Direction dir : Direction.Plane.HORIZONTAL) {
+
+                // Notify connected non-cable neighbours (gates etc.); cables are handled by this flood fill
+                BlockState cableState = level.getBlockState(p);
+                for (Direction dir : Direction.values()) {
+                    if (!cableState.getValue(getPropertyForDirection(dir))) continue;
                     BlockPos n = p.relative(dir);
                     if (!level.getBlockState(n).is(ModBlocks.DIGITAL_CABLE.get())) {
                         level.neighborChanged(n, this, p);
