@@ -135,6 +135,8 @@ public class DataBusBlock extends BaseEntityBlock {
         Deque<BlockPos> queue = new ArrayDeque<>();
         network.add(pos);
         queue.add(pos);
+
+        boolean hasSource = false;
         int value = 0;
 
         while (!queue.isEmpty()) {
@@ -143,7 +145,7 @@ public class DataBusBlock extends BaseEntityBlock {
 
             for (Direction dir : Direction.values()) {
                 DataBusConnection side = currentState.getValue(getPropertyForDirection(dir));
-                if (side != DataBusConnection.CONNECTED) continue;   // NONE or DISABLED: don't traverse or read
+                if (side != DataBusConnection.CONNECTED) continue;
 
                 BlockPos next = current.relative(dir);
                 BlockState nextState = level.getBlockState(next);
@@ -154,7 +156,11 @@ public class DataBusBlock extends BaseEntityBlock {
                     if (network.size() < MAX_NETWORK && network.add(next)) queue.add(next);
                 } else {
                     DataValueOutput out = DataValueLookup.findOutput(level, next, dir.getOpposite());
-                    if (out != null) value = Math.max(value, out.getValue());
+                    if (out != null) {
+                        int v = out.getValue();
+                        value = hasSource ? Math.max(value, v) : v;
+                        hasSource = true;
+                    }
                 }
             }
         }
