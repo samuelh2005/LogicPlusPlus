@@ -22,6 +22,7 @@ public final class LogicPlusPlusNeoForge {
     public static void registerCaps(RegisterCapabilitiesEvent event) {
         registerDataBlock(event, ModBlockEntities.COUNTER.get());
         registerDataBlock(event, ModBlockEntities.DATA_BUS.get());
+        registerDataBlock(event, ModBlockEntities.VALUE_SOURCE.get());
     }
 
     // Every data block entity just forwards the lookups to what it declares per side

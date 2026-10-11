@@ -16,6 +16,7 @@ public final class LogicPlusPlusFabric implements ModInitializer {
 
         registerDataBlock(ModBlockEntities.COUNTER.get());
         registerDataBlock(ModBlockEntities.DATA_BUS.get());
+        registerDataBlock(ModBlockEntities.VALUE_SOURCE.get());
     }
 
     // Every data block entity just forwards the lookups to what it declares per side
