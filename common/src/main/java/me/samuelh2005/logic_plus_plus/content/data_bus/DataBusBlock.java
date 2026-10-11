@@ -24,30 +24,29 @@ import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
-import net.minecraft.world.level.block.state.properties.BlockStateProperties;
-import net.minecraft.world.level.block.state.properties.BooleanProperty;
+import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.level.block.state.properties.Property;
 
 public class DataBusBlock extends BaseEntityBlock {
     private static final int MAX_NETWORK = 256;
 
     public static final MapCodec<DataBusBlock> CODEC = simpleCodec(DataBusBlock::new);
-    public static final BooleanProperty NORTH = BlockStateProperties.NORTH;
-    public static final BooleanProperty EAST = BlockStateProperties.EAST;
-    public static final BooleanProperty SOUTH = BlockStateProperties.SOUTH;
-    public static final BooleanProperty WEST = BlockStateProperties.WEST;
-    public static final BooleanProperty UP = BlockStateProperties.UP;
-    public static final BooleanProperty DOWN = BlockStateProperties.DOWN;
+    public static final EnumProperty<DataBusConnection> NORTH = EnumProperty.create("north", DataBusConnection.class);
+    public static final EnumProperty<DataBusConnection> EAST = EnumProperty.create("east", DataBusConnection.class);
+    public static final EnumProperty<DataBusConnection> SOUTH = EnumProperty.create("south", DataBusConnection.class);
+    public static final EnumProperty<DataBusConnection> WEST = EnumProperty.create("west", DataBusConnection.class);
+    public static final EnumProperty<DataBusConnection> UP = EnumProperty.create("up", DataBusConnection.class);
+    public static final EnumProperty<DataBusConnection> DOWN = EnumProperty.create("down", DataBusConnection.class);
 
     public DataBusBlock(Properties properties) {
         super(properties);
         registerDefaultState(stateDefinition.any()
-            .setValue(NORTH, false)
-            .setValue(EAST, false)
-            .setValue(SOUTH, false)
-            .setValue(WEST, false)
-            .setValue(UP, false)
-            .setValue(DOWN, false)
+            .setValue(NORTH, DataBusConnection.NONE)
+            .setValue(EAST, DataBusConnection.NONE)
+            .setValue(SOUTH, DataBusConnection.NONE)
+            .setValue(WEST, DataBusConnection.NONE)
+            .setValue(UP, DataBusConnection.NONE)
+            .setValue(DOWN, DataBusConnection.NONE)
         );
     }
 
@@ -68,11 +67,22 @@ public class DataBusBlock extends BaseEntityBlock {
     @Override
     protected RenderShape getRenderShape(BlockState state) { return RenderShape.MODEL; }
 
-    private static boolean connection(BlockState neighbor) {
-        return neighbor.is(ModTags.DIGITAL_BLOCKS);
+    private static DataBusConnection resolve(DataBusConnection current, Direction dir, BlockState neighbor) {
+        // The player's choice sticks until they toggle it again
+        if (current == DataBusConnection.DISABLED) return DataBusConnection.DISABLED;
+
+        if (!neighbor.is(ModTags.DIGITAL_BLOCKS)) return DataBusConnection.NONE;
+
+        // The neighbouring bus has switched off its side facing us, so don't draw an arm toward it
+        if (neighbor.is(ModBlocks.DATA_BUS.get())
+                && neighbor.getValue(getPropertyForDirection(dir.getOpposite())) == DataBusConnection.DISABLED) {
+            return DataBusConnection.NONE;
+        }
+
+        return DataBusConnection.CONNECTED;
     }
 
-    private static BooleanProperty getPropertyForDirection(Direction dir) {
+    private static EnumProperty<DataBusConnection> getPropertyForDirection(Direction dir) {
         return switch (dir) {
             case NORTH -> NORTH;
             case EAST -> EAST;
@@ -90,9 +100,9 @@ public class DataBusBlock extends BaseEntityBlock {
         BlockState state = defaultBlockState();
 
         for (Direction dir : Direction.values()) {
-            BlockPos neighborPos = pos.relative(dir);
-            BlockState neighborState = level.getBlockState(neighborPos);
-            state = state.setValue(getPropertyForDirection(dir), connection(neighborState));
+            BlockState neighborState = level.getBlockState(pos.relative(dir));
+            state = state.setValue(getPropertyForDirection(dir),
+                    resolve(DataBusConnection.NONE, dir, neighborState));
         }
 
         return state;
@@ -101,8 +111,8 @@ public class DataBusBlock extends BaseEntityBlock {
     @Override
     protected BlockState updateShape(BlockState state, Direction dir, BlockState neighborState,
                                     LevelAccessor level, BlockPos pos, BlockPos neighborPos) {
-        state = state.setValue(getPropertyForDirection(dir), connection(neighborState));
-        return state;
+        EnumProperty<DataBusConnection> prop = getPropertyForDirection(dir);
+        return state.setValue(prop, resolve(state.getValue(prop), dir, neighborState));
     }
 
     @Override
@@ -130,15 +140,15 @@ public class DataBusBlock extends BaseEntityBlock {
             BlockState currentState = level.getBlockState(current);
 
             for (Direction dir : Direction.values()) {
-                // This side of the cable is disconnected: don't traverse or read through it
-                if (!currentState.getValue(getPropertyForDirection(dir))) continue;
+                DataBusConnection side = currentState.getValue(getPropertyForDirection(dir));
+                if (side != DataBusConnection.CONNECTED) continue;   // NONE or DISABLED: don't traverse or read
 
                 BlockPos next = current.relative(dir);
                 BlockState nextState = level.getBlockState(next);
 
                 if (nextState.is(ModBlocks.DATA_BUS.get())) {
-                    // Both cables must agree the link exists
-                    if (!nextState.getValue(getPropertyForDirection(dir.getOpposite()))) continue;
+                    DataBusConnection other = nextState.getValue(getPropertyForDirection(dir.getOpposite()));
+                    if (!side.isConnected(other)) continue;
                     if (network.size() < MAX_NETWORK && network.add(next)) queue.add(next);
                 } else if (nextState.is(ModTags.DIGITAL_BLOCKS)) {
                     ValueSource src = ValueSourceProvider.find(level, next, dir.getOpposite());
@@ -148,13 +158,12 @@ public class DataBusBlock extends BaseEntityBlock {
         }
 
         for (BlockPos p : network) {
-            if (level.getBlockEntity(p) instanceof DataBusBlockEntity cable && cable.getValue() != value) {
-                cable.setValue(value);
+            if (level.getBlockEntity(p) instanceof DataBusBlockEntity bus && bus.getValue() != value) {
+                bus.setValue(value);
 
-                // Notify connected non-cable neighbours (gates etc.); cables are handled by this flood fill
-                BlockState cableState = level.getBlockState(p);
+                BlockState busState = level.getBlockState(p);
                 for (Direction dir : Direction.values()) {
-                    if (!cableState.getValue(getPropertyForDirection(dir))) continue;
+                    if (busState.getValue(getPropertyForDirection(dir)) != DataBusConnection.CONNECTED) continue;
                     BlockPos n = p.relative(dir);
                     if (!level.getBlockState(n).is(ModBlocks.DATA_BUS.get())) {
                         level.neighborChanged(n, this, p);
