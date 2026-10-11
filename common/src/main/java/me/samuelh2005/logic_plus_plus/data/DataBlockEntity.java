@@ -43,19 +43,6 @@ public abstract class DataBlockEntity extends BlockEntity {
         }
     }
 
-    /** The data output of whatever is next to us on the given absolute side, or null. */
-    @Nullable
-    protected DataValueOutput findOutputAt(Direction side) {
-        if (level == null) return null;
-        return DataValueLookup.findOutput(level, worldPosition.relative(side), side.getOpposite());
-    }
-
-    /** Convenience: the value coming in from that side, 0 if nothing is there. */
-    protected int readValueAt(Direction side) {
-        DataValueOutput out = findOutputAt(side);
-        return out == null ? 0 : out.getValue();
-    }
-
     protected boolean hasRedstoneInput(Direction side) {
         return level != null && level.getControlInputSignal(worldPosition.relative(side), side, false) > 0;
     }

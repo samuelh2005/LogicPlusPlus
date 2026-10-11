@@ -137,7 +137,7 @@ public class DataBusBlock extends BaseEntityBlock {
             BlockPos neighborPos = blockPos.relative(dir);
             if (level.getBlockState(neighborPos).is(ModBlocks.DATA_BUS.get())) continue;
             DataValueInput input = DataValueLookup.findInput(level, neighborPos, dir.getOpposite());
-            if (input != null) input.onInputChanged();
+            if (input != null) input.onInputChanged(0);
         }
     }
 
@@ -187,7 +187,7 @@ public class DataBusBlock extends BaseEntityBlock {
                     BlockPos n = p.relative(dir);
                     if (level.getBlockState(n).is(ModBlocks.DATA_BUS.get())) continue;
                     DataValueInput input = DataValueLookup.findInput(level, n, dir.getOpposite());
-                    if (input != null) input.onInputChanged();
+                    if (input != null) input.onInputChanged(value);
                 }
             }
         }

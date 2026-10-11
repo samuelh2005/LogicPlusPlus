@@ -7,5 +7,5 @@ package me.samuelh2005.logic_plus_plus.data;
  */
 @FunctionalInterface
 public interface DataValueInput {
-    void onInputChanged();
+    void onInputChanged(int newValue);
 }

@@ -42,9 +42,8 @@ public class DigitalDisplayBlockEntity extends DataBlockEntity {
         return side == toAbsolute(BACK) ? BACK_INPUT : null;
     }
 
-    public void onInputChanged() {
+    public void onInputChanged(int newValue) {
         if (level == null || level.isClientSide) return;
-        int newValue = readValueAt(toAbsolute(BACK));
         if (newValue == value) return;
         value = newValue;
         setChanged();
@@ -84,8 +83,8 @@ public class DigitalDisplayBlockEntity extends DataBlockEntity {
         }
 
         @Override
-        public void onInputChanged() {
-            blockEntity.onInputChanged();
+        public void onInputChanged(int newValue) {
+            blockEntity.onInputChanged(newValue);
         }
     }
 }

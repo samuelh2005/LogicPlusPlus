@@ -20,9 +20,8 @@ public class CounterBlockEntity extends DataBlockEntity {
     private static final Direction CLOCK = Direction.EAST;   // redstone only
     private static final Direction MODE = Direction.WEST;    // redstone only
 
-    // The back input is sampled on the clock edge, so there's nothing to do when it changes
-    private static final DataValueInput SAMPLED_ON_CLOCK = () -> {};
-
+    private final CounterBlockEntityDataValueInput BACK_INPUT = new CounterBlockEntityDataValueInput(this);
+    private int value;
     private int count;
 
     public CounterBlockEntity(BlockPos pos, BlockState state) {
@@ -56,7 +55,7 @@ public class CounterBlockEntity extends DataBlockEntity {
     @Nullable
     @Override
     public DataValueInput getDataInput(@Nullable Direction side) {
-        return side == toAbsolute(BACK) ? SAMPLED_ON_CLOCK : null;
+        return side == toAbsolute(BACK) ? BACK_INPUT : null;
     }
 
     @Override
@@ -80,7 +79,7 @@ public class CounterBlockEntity extends DataBlockEntity {
             // Rising edge: act once and remember we're powered
             level.setBlock(worldPosition, state.setValue(CounterBlock.TRIGGERED, true), Block.UPDATE_CLIENTS);
             if (mode) {
-                setCount(readValueAt(toAbsolute(BACK)));  // 0 if nothing is connected
+                setCount(value);
             } else {
                 setCount(count + 1);
             }
@@ -94,5 +93,18 @@ public class CounterBlockEntity extends DataBlockEntity {
         count = newCount;
         setChanged();
         notifyOutputs();
+    }
+
+    public static class CounterBlockEntityDataValueInput implements DataValueInput {
+        private final CounterBlockEntity blockEntity;
+
+        public CounterBlockEntityDataValueInput(CounterBlockEntity blockEntity) {
+            this.blockEntity = blockEntity;
+        }
+
+        @Override
+        public void onInputChanged(int newValue) {
+            blockEntity.value = newValue;
+        }
     }
 }
