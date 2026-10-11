@@ -1,6 +1,8 @@
 package me.samuelh2005.logic_plus_plus.foundation;
 
 import dev.architectury.networking.NetworkManager;
+import dev.architectury.platform.Platform;
+import dev.architectury.utils.Env;
 import me.samuelh2005.logic_plus_plus.network.OpenValueSourceScreenS2C;
 import me.samuelh2005.logic_plus_plus.network.SubmitValueSourceScreenC2S;
 
@@ -12,15 +14,12 @@ public class ModNetworking {
                 SubmitValueSourceScreenC2S.CODEC,
                 (payload, context) -> context.queue(() -> SubmitValueSourceScreenC2S.handle(payload, context))
         );
-        NetworkManager.registerReceiver(
-                NetworkManager.Side.S2C,
-                OpenValueSourceScreenS2C.TYPE,
-                OpenValueSourceScreenS2C.CODEC,
-                (payload, context) -> context.queue(() -> OpenValueSourceScreenS2C.handle(payload, context))
-        );
-        // NetworkManager.registerS2CPayloadType(
-        //         OpenValueSourceScreenS2C.TYPE,
-        //         OpenValueSourceScreenS2C.CODEC
-        // );
+
+        if (Platform.getEnvironment() == Env.SERVER) {
+            NetworkManager.registerS2CPayloadType(
+                    OpenValueSourceScreenS2C.TYPE,
+                    OpenValueSourceScreenS2C.CODEC
+            );
+        }
     }
 }

@@ -7,6 +7,7 @@ import dev.architectury.registry.client.rendering.BlockEntityRendererRegistry;
 import me.samuelh2005.logic_plus_plus.content.digital_display.DigitalDisplayRenderer;
 import me.samuelh2005.logic_plus_plus.foundation.ModBlockEntities;
 import me.samuelh2005.logic_plus_plus.foundation.ModBlocks;
+import me.samuelh2005.logic_plus_plus.foundation.ModClientNetworking;
 import me.samuelh2005.logic_plus_plus.foundation.ModCreativeTabs;
 import me.samuelh2005.logic_plus_plus.foundation.ModItems;
 import me.samuelh2005.logic_plus_plus.foundation.ModNetworking;
@@ -26,6 +27,7 @@ public final class LogicPlusPlus {
     }
 
     public static void initClient() {
+        ModClientNetworking.register();
         BlockEntityRendererRegistry.register(ModBlockEntities.DIGITAL_DISPLAY.get(), DigitalDisplayRenderer::new);
     }
 }

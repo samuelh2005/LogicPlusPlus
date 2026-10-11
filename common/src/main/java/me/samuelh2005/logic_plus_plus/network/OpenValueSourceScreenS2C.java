@@ -1,18 +1,12 @@
 package me.samuelh2005.logic_plus_plus.network;
 
-import dev.architectury.networking.NetworkManager.PacketContext;
 import me.samuelh2005.logic_plus_plus.LogicPlusPlus;
-import me.samuelh2005.logic_plus_plus.content.value_source.ValueSourceScreen;
-import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.level.Level;
 
 public record OpenValueSourceScreenS2C(
     BlockPos pos,
@@ -30,16 +24,5 @@ public record OpenValueSourceScreenS2C(
     @Override
     public Type<OpenValueSourceScreenS2C> type() {
         return TYPE;
-    }
-
-    public static void handle(OpenValueSourceScreenS2C payload, PacketContext context) {
-        Player player = context.getPlayer();
-        Level level = player.level();
-        if (!level.isClientSide()) return;
-        Minecraft.getInstance().setScreen(new ValueSourceScreen(
-            payload.initialValue(),
-            payload.pos(),
-            Component.literal("Value Source")
-        ));
     }
 }
