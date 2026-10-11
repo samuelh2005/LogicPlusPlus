@@ -130,6 +130,18 @@ public class DataBusBlock extends BaseEntityBlock {
     }
 
     @Override
+    protected void onRemove(BlockState blockState, Level level, BlockPos blockPos, BlockState blockState2, boolean bl) {
+        // When a bus is removed notify all its neighbors that are a DataValueInput
+        for (Direction dir : Direction.values()) {
+            if (blockState.getValue(getPropertyForDirection(dir)) != DataBusConnection.CONNECTED) continue;
+            BlockPos neighborPos = blockPos.relative(dir);
+            if (level.getBlockState(neighborPos).is(ModBlocks.DATA_BUS.get())) continue;
+            DataValueInput input = DataValueLookup.findInput(level, neighborPos, dir.getOpposite());
+            if (input != null) input.onInputChanged();
+        }
+    }
+
+    @Override
     protected void tick(BlockState state, ServerLevel level, BlockPos pos, RandomSource random) {
         Set<BlockPos> network = new HashSet<>();
         Deque<BlockPos> queue = new ArrayDeque<>();
