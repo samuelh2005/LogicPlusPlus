@@ -69,21 +69,24 @@ public class CounterBlock extends BaseEntityBlock {
         // Only run on the server side
         if (level.isClientSide) return;
 
-        boolean right = getSidedSignal(level, pos, Direction.EAST);
-        boolean left = getSidedSignal(level, pos, Direction.WEST);
+        boolean clock = getSidedSignal(level, pos, Direction.EAST);
+        boolean mode = getSidedSignal(level, pos, Direction.WEST);
 
         boolean triggered = state.getValue(TRIGGERED);
-        boolean powered = right || left;
 
-        if (powered && !triggered) {
+        if (clock && !triggered) {
             // Rising edge: count once or reset and remember we're powered
             level.setBlock(pos, state.setValue(TRIGGERED, true), Block.UPDATE_CLIENTS);
             if (level.getBlockEntity(pos) instanceof CounterBlockEntity counter) {
-                // Count if the right side is powered, reset if the left side is powered
-                if (right) counter.onSignal(true);
-                if (left) counter.setCount(0);
+                if (mode) {
+                    // If mode is true, load value from the behind input.
+                    counter.setCount(0); // TODO: Load value from behind input instead of resetting to 0
+                } else {
+                    // If mode is false, increment the counter.
+                    counter.setCount(counter.getCount() + 1);
+                }
             }
-        } else if (!powered && triggered) {
+        } else if (!clock && triggered) {
             // Falling edge: reset so the next pulse can count
             level.setBlock(pos, state.setValue(TRIGGERED, false), Block.UPDATE_CLIENTS);
         }

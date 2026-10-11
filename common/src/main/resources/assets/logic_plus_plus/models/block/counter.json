@@ -1,0 +1,27 @@
+{
+	"format_version": "1.9.0",
+	"credit": "Made with Blockbench",
+	"textures": {
+		"0": "logic_plus_plus:block/counter_back",
+		"1": "logic_plus_plus:block/counter_bottom",
+		"2": "logic_plus_plus:block/counter_front",
+		"3": "logic_plus_plus:block/counter_right",
+		"4": "logic_plus_plus:block/counter_left",
+		"5": "logic_plus_plus:block/counter_top",
+		"particle": "logic_plus_plus:block/counter_back"
+	},
+	"elements": [
+		{
+			"from": [0, 0, 0],
+			"to": [16, 16, 16],
+			"faces": {
+				"north": {"uv": [0, 0, 16, 16], "texture": "#2"},
+				"east": {"uv": [0, 0, 16, 16], "texture": "#3"},
+				"south": {"uv": [0, 0, 16, 16], "texture": "#0"},
+				"west": {"uv": [0, 0, 16, 16], "texture": "#4"},
+				"up": {"uv": [0, 0, 16, 16], "texture": "#5"},
+				"down": {"uv": [0, 0, 16, 16], "texture": "#1"}
+			}
+		}
+	]
+}

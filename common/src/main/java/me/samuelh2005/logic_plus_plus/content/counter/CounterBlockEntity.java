@@ -39,14 +39,6 @@ public class CounterBlockEntity extends BlockEntity {
         level.updateNeighborsAt(worldPosition, getBlockState().getBlock());
     }
 
-    public void onSignal(boolean signal) {
-        if (level == null || level.isClientSide) return;
-
-        count++;
-        setChanged();
-        level.updateNeighborsAt(worldPosition, getBlockState().getBlock());
-    }
-
     public ValueSource getValueOutput() {
         return new ValueSource(count);
     }
