@@ -5,6 +5,7 @@ import dev.architectury.registry.registries.RegistrySupplier;
 import me.samuelh2005.logic_plus_plus.LogicPlusPlus;
 import me.samuelh2005.logic_plus_plus.content.counter.CounterBlockEntity;
 import me.samuelh2005.logic_plus_plus.content.data_bus.DataBusBlockEntity;
+import me.samuelh2005.logic_plus_plus.content.digital_display.DigitalDisplayBlockEntity;
 import me.samuelh2005.logic_plus_plus.content.value_source.ValueSourceBlockEntity;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -22,6 +23,11 @@ public final class ModBlockEntities {
             BLOCK_ENTITIES.register("data_bus",
                     () -> BlockEntityType.Builder.of(DataBusBlockEntity::new,
                             ModBlocks.DATA_BUS.get()).build(null));
+
+    public static final RegistrySupplier<BlockEntityType<DigitalDisplayBlockEntity>> DIGITAL_DISPLAY =
+            BLOCK_ENTITIES.register("digital_display",
+                    () -> BlockEntityType.Builder.of(DigitalDisplayBlockEntity::new,
+                            ModBlocks.DIGITAL_DISPLAY.get()).build(null));
 
     public static final RegistrySupplier<BlockEntityType<ValueSourceBlockEntity>> VALUE_SOURCE =
             BLOCK_ENTITIES.register("value_source",

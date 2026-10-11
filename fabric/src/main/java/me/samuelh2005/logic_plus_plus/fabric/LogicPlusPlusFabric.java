@@ -16,6 +16,7 @@ public final class LogicPlusPlusFabric implements ModInitializer {
 
         registerDataBlock(ModBlockEntities.COUNTER.get());
         registerDataBlock(ModBlockEntities.DATA_BUS.get());
+        registerDataBlock(ModBlockEntities.DIGITAL_DISPLAY.get());
         registerDataBlock(ModBlockEntities.VALUE_SOURCE.get());
     }
 
