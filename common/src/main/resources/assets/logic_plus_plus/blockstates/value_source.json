@@ -1,0 +1,7 @@
+{
+    "variants": {
+        "": {
+            "model": "logic_plus_plus:block/value_source"
+        }
+    }
+}

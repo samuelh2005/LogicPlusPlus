@@ -5,6 +5,7 @@ import dev.architectury.registry.registries.RegistrySupplier;
 import me.samuelh2005.logic_plus_plus.LogicPlusPlus;
 import me.samuelh2005.logic_plus_plus.content.counter.CounterBlock;
 import me.samuelh2005.logic_plus_plus.content.data_bus.DataBusBlock;
+import me.samuelh2005.logic_plus_plus.content.value_source.ValueSourceBlock;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockBehaviour;
@@ -20,6 +21,11 @@ public final class ModBlocks {
     
     public static final RegistrySupplier<DataBusBlock> DATA_BUS = BLOCKS.register("data_bus",
             () -> new DataBusBlock(BlockBehaviour.Properties.of()
+                    .strength(2.0f)
+                    .requiresCorrectToolForDrops()));
+
+    public static final RegistrySupplier<ValueSourceBlock> VALUE_SOURCE = BLOCKS.register("value_source",
+            () -> new ValueSourceBlock(BlockBehaviour.Properties.of()
                     .strength(2.0f)
                     .requiresCorrectToolForDrops()));
 

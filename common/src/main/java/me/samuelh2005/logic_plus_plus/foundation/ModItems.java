@@ -19,5 +19,9 @@ public final class ModItems {
             () -> new BlockItem(ModBlocks.DATA_BUS.get(),
                     new Item.Properties().arch$tab(ModCreativeTabs.MAIN)));
 
+    public static final RegistrySupplier<Item> VALUE_SOURCE = ITEMS.register("value_source",
+            () -> new BlockItem(ModBlocks.VALUE_SOURCE.get(),
+                    new Item.Properties().arch$tab(ModCreativeTabs.MAIN)));
+
     public static void register() { ITEMS.register(); }
 }
