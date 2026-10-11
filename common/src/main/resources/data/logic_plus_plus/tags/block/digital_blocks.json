@@ -1,7 +1,7 @@
 {
     "replace": false,
     "values": [
-        "logic_plus_plus:digital_cable",
+        "logic_plus_plus:data_bus",
         "logic_plus_plus:counter"
     ]
 }

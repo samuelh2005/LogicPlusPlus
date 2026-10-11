@@ -1,4 +1,4 @@
-package me.samuelh2005.logic_plus_plus.content.digital_cable;
+package me.samuelh2005.logic_plus_plus.content.data_bus;
 
 import me.samuelh2005.logic_plus_plus.foundation.ModBlockEntities;
 import me.samuelh2005.logic_plus_plus.systems.ValueSource;
@@ -8,11 +8,11 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 
-public class DigitalCableBlockEntity extends BlockEntity {
+public class DataBusBlockEntity extends BlockEntity {
     private int value;
 
-    public DigitalCableBlockEntity(BlockPos pos, BlockState state) {
-        super(ModBlockEntities.DIGITAL_CABLE.get(), pos, state);
+    public DataBusBlockEntity(BlockPos pos, BlockState state) {
+        super(ModBlockEntities.DATA_BUS.get(), pos, state);
     }
 
     @Override

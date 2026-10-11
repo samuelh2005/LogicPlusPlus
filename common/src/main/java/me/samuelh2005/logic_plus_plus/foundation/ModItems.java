@@ -15,8 +15,8 @@ public final class ModItems {
             () -> new BlockItem(ModBlocks.COUNTER.get(),
                     new Item.Properties().arch$tab(ModCreativeTabs.MAIN)));
     
-    public static final RegistrySupplier<Item> DIGITAL_CABLE = ITEMS.register("digital_cable",
-            () -> new BlockItem(ModBlocks.DIGITAL_CABLE.get(),
+    public static final RegistrySupplier<Item> DATA_BUS = ITEMS.register("data_bus",
+            () -> new BlockItem(ModBlocks.DATA_BUS.get(),
                     new Item.Properties().arch$tab(ModCreativeTabs.MAIN)));
 
     public static void register() { ITEMS.register(); }

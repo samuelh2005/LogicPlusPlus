@@ -23,7 +23,7 @@ public final class LogicPlusPlusNeoForge {
             (be, side) -> be.getValueOutput());
     
         event.registerBlockEntity(ValueSourceProviderImpl.VALUE_SOURCE,
-            ModBlockEntities.DIGITAL_CABLE.get(),
+            ModBlockEntities.DATA_BUS.get(),
             (be, side) -> be.getValueOutput());
     }
 }

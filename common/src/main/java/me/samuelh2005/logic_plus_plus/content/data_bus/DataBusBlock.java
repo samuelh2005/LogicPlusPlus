@@ -1,4 +1,4 @@
-package me.samuelh2005.logic_plus_plus.content.digital_cable;
+package me.samuelh2005.logic_plus_plus.content.data_bus;
 
 import java.util.ArrayDeque;
 import java.util.Deque;
@@ -28,10 +28,10 @@ import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.Property;
 
-public class DigitalCableBlock extends BaseEntityBlock {
+public class DataBusBlock extends BaseEntityBlock {
     private static final int MAX_NETWORK = 256;
 
-    public static final MapCodec<DigitalCableBlock> CODEC = simpleCodec(DigitalCableBlock::new);
+    public static final MapCodec<DataBusBlock> CODEC = simpleCodec(DataBusBlock::new);
     public static final BooleanProperty NORTH = BlockStateProperties.NORTH;
     public static final BooleanProperty EAST = BlockStateProperties.EAST;
     public static final BooleanProperty SOUTH = BlockStateProperties.SOUTH;
@@ -39,7 +39,7 @@ public class DigitalCableBlock extends BaseEntityBlock {
     public static final BooleanProperty UP = BlockStateProperties.UP;
     public static final BooleanProperty DOWN = BlockStateProperties.DOWN;
 
-    public DigitalCableBlock(Properties properties) {
+    public DataBusBlock(Properties properties) {
         super(properties);
         registerDefaultState(stateDefinition.any()
             .setValue(NORTH, false)
@@ -61,7 +61,7 @@ public class DigitalCableBlock extends BaseEntityBlock {
 
     @Override
     public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
-        return new DigitalCableBlockEntity(pos, state);
+        return new DataBusBlockEntity(pos, state);
     }
 
     // BaseEntityBlock defaults to INVISIBLE, so this is required
@@ -136,7 +136,7 @@ public class DigitalCableBlock extends BaseEntityBlock {
                 BlockPos next = current.relative(dir);
                 BlockState nextState = level.getBlockState(next);
 
-                if (nextState.is(ModBlocks.DIGITAL_CABLE.get())) {
+                if (nextState.is(ModBlocks.DATA_BUS.get())) {
                     // Both cables must agree the link exists
                     if (!nextState.getValue(getPropertyForDirection(dir.getOpposite()))) continue;
                     if (network.size() < MAX_NETWORK && network.add(next)) queue.add(next);
@@ -148,7 +148,7 @@ public class DigitalCableBlock extends BaseEntityBlock {
         }
 
         for (BlockPos p : network) {
-            if (level.getBlockEntity(p) instanceof DigitalCableBlockEntity cable && cable.getValue() != value) {
+            if (level.getBlockEntity(p) instanceof DataBusBlockEntity cable && cable.getValue() != value) {
                 cable.setValue(value);
 
                 // Notify connected non-cable neighbours (gates etc.); cables are handled by this flood fill
@@ -156,7 +156,7 @@ public class DigitalCableBlock extends BaseEntityBlock {
                 for (Direction dir : Direction.values()) {
                     if (!cableState.getValue(getPropertyForDirection(dir))) continue;
                     BlockPos n = p.relative(dir);
-                    if (!level.getBlockState(n).is(ModBlocks.DIGITAL_CABLE.get())) {
+                    if (!level.getBlockState(n).is(ModBlocks.DATA_BUS.get())) {
                         level.neighborChanged(n, this, p);
                     }
                 }

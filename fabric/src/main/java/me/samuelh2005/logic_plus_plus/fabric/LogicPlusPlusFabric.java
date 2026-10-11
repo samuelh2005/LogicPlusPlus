@@ -23,7 +23,7 @@ public final class LogicPlusPlusFabric implements ModInitializer {
 
         ValueSourceProviderImpl.VALUE_SOURCE.registerForBlockEntity(
             (be, side) -> be.getValueOutput(),
-            ModBlockEntities.DIGITAL_CABLE.get()
+            ModBlockEntities.DATA_BUS.get()
         );
     }
 }
