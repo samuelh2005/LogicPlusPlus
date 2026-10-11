@@ -1,14 +1,17 @@
 package me.samuelh2005.logic_plus_plus.content.data_bus;
 
+import org.jetbrains.annotations.Nullable;
+
+import me.samuelh2005.logic_plus_plus.data.DataBlockEntity;
+import me.samuelh2005.logic_plus_plus.data.DataValueOutput;
 import me.samuelh2005.logic_plus_plus.foundation.ModBlockEntities;
-import me.samuelh2005.logic_plus_plus.systems.ValueSource;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 
-public class DataBusBlockEntity extends BlockEntity {
+public class DataBusBlockEntity extends DataBlockEntity {
     private int value;
 
     public DataBusBlockEntity(BlockPos pos, BlockState state) {
@@ -36,7 +39,12 @@ public class DataBusBlockEntity extends BlockEntity {
         setChanged();
     }
 
-    public ValueSource getValueOutput() {
-        return new ValueSource(value);
+    /** A bus only outputs on sides that are actually connected (not NONE, not DISABLED). */
+    @Nullable
+    @Override
+    public DataValueOutput getDataOutput(@Nullable Direction side) {
+        if (side == null) return null;
+        boolean connected = getBlockState().getValue(DataBusBlock.getPropertyForDirection(side)) == DataBusConnection.CONNECTED;
+        return connected ? () -> value : null;
     }
 }

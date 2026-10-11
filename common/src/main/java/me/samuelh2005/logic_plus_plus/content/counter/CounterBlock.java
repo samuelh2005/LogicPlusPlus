@@ -51,44 +51,13 @@ public class CounterBlock extends BaseEntityBlock {
     protected RenderShape getRenderShape(BlockState state) { return RenderShape.MODEL; }
 
 
-    private static boolean getSidedSignal(Level level, BlockPos pos, Direction side) {
-        BlockState state = level.getBlockState(pos);
-        Direction facing = state.getValue(FACING);
-
-        // Rotate the relative side by however far the block is turned from NORTH
-        Direction absolute = side;
-        for (Direction d = Direction.NORTH; d != facing; d = d.getClockWise()) {
-            absolute = absolute.getClockWise();
-        }
-
-        return level.getControlInputSignal(pos.relative(absolute), absolute, false) > 0;
-    }
+    // ---- events: the block only forwards, the block entity does the work ----
 
     @Override
     protected void neighborChanged(BlockState state, Level level, BlockPos pos, Block block, BlockPos fromPos, boolean isMoving) {
-        // Only run on the server side
         if (level.isClientSide) return;
-
-        boolean clock = getSidedSignal(level, pos, Direction.EAST);
-        boolean mode = getSidedSignal(level, pos, Direction.WEST);
-
-        boolean triggered = state.getValue(TRIGGERED);
-
-        if (clock && !triggered) {
-            // Rising edge: count once or reset and remember we're powered
-            level.setBlock(pos, state.setValue(TRIGGERED, true), Block.UPDATE_CLIENTS);
-            if (level.getBlockEntity(pos) instanceof CounterBlockEntity counter) {
-                if (mode) {
-                    // If mode is true, load value from the behind input.
-                    counter.setCount(0); // TODO: Load value from behind input instead of resetting to 0
-                } else {
-                    // If mode is false, increment the counter.
-                    counter.setCount(counter.getCount() + 1);
-                }
-            }
-        } else if (!clock && triggered) {
-            // Falling edge: reset so the next pulse can count
-            level.setBlock(pos, state.setValue(TRIGGERED, false), Block.UPDATE_CLIENTS);
+        if (level.getBlockEntity(pos) instanceof CounterBlockEntity counter) {
+            counter.onNeighborChanged();
         }
     }
 
@@ -100,7 +69,7 @@ public class CounterBlock extends BaseEntityBlock {
     @Override
     public int getAnalogOutputSignal(BlockState state, Level level, BlockPos pos) {
         if (level.getBlockEntity(pos) instanceof CounterBlockEntity counter) {
-            return counter.getCount();
+            return Math.min(counter.getCount(), 15);
         }
         return 0;
     }

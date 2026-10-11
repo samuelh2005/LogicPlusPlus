@@ -7,10 +7,10 @@ import java.util.Set;
 
 import com.mojang.serialization.MapCodec;
 
+import me.samuelh2005.logic_plus_plus.data.DataValueInput;
+import me.samuelh2005.logic_plus_plus.data.DataValueLookup;
+import me.samuelh2005.logic_plus_plus.data.DataValueOutput;
 import me.samuelh2005.logic_plus_plus.foundation.ModBlocks;
-import me.samuelh2005.logic_plus_plus.foundation.ModTags;
-import me.samuelh2005.logic_plus_plus.systems.ValueSource;
-import me.samuelh2005.logic_plus_plus.systems.ValueSourceProvider;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
@@ -67,22 +67,24 @@ public class DataBusBlock extends BaseEntityBlock {
     @Override
     protected RenderShape getRenderShape(BlockState state) { return RenderShape.MODEL; }
 
-    private static DataBusConnection resolve(DataBusConnection current, Direction dir, BlockState neighbor) {
+    private static DataBusConnection resolve(DataBusConnection current, Direction dir, BlockState neighbor,
+                                             LevelAccessor level, BlockPos neighborPos) {
         // The player's choice sticks until they toggle it again
         if (current == DataBusConnection.DISABLED) return DataBusConnection.DISABLED;
 
-        if (!neighbor.is(ModTags.DIGITAL_BLOCKS)) return DataBusConnection.NONE;
-
-        // The neighbouring bus has switched off its side facing us, so don't draw an arm toward it
-        if (neighbor.is(ModBlocks.DATA_BUS.get())
-                && neighbor.getValue(getPropertyForDirection(dir.getOpposite())) == DataBusConnection.DISABLED) {
-            return DataBusConnection.NONE;
+        if (neighbor.is(ModBlocks.DATA_BUS.get())) {
+            // The neighbouring bus has switched off its side facing us, so don't draw an arm toward it
+            return neighbor.getValue(getPropertyForDirection(dir.getOpposite())) == DataBusConnection.DISABLED
+                    ? DataBusConnection.NONE : DataBusConnection.CONNECTED;
         }
 
-        return DataBusConnection.CONNECTED;
+        // Anything else must expose a data input or output on the face touching us.
+        // Redstone-only faces don't count.
+        return DataValueLookup.hasConnection(level, neighborPos, dir.getOpposite())
+                ? DataBusConnection.CONNECTED : DataBusConnection.NONE;
     }
 
-    private static EnumProperty<DataBusConnection> getPropertyForDirection(Direction dir) {
+    public static EnumProperty<DataBusConnection> getPropertyForDirection(Direction dir) {
         return switch (dir) {
             case NORTH -> NORTH;
             case EAST -> EAST;
@@ -102,7 +104,7 @@ public class DataBusBlock extends BaseEntityBlock {
         for (Direction dir : Direction.values()) {
             BlockState neighborState = level.getBlockState(pos.relative(dir));
             state = state.setValue(getPropertyForDirection(dir),
-                    resolve(DataBusConnection.NONE, dir, neighborState));
+                    resolve(DataBusConnection.NONE, dir, neighborState, level, pos.relative(dir)));
         }
 
         return state;
@@ -112,7 +114,7 @@ public class DataBusBlock extends BaseEntityBlock {
     protected BlockState updateShape(BlockState state, Direction dir, BlockState neighborState,
                                     LevelAccessor level, BlockPos pos, BlockPos neighborPos) {
         EnumProperty<DataBusConnection> prop = getPropertyForDirection(dir);
-        return state.setValue(prop, resolve(state.getValue(prop), dir, neighborState));
+        return state.setValue(prop, resolve(state.getValue(prop), dir, neighborState, level, neighborPos));
     }
 
     @Override
@@ -150,9 +152,9 @@ public class DataBusBlock extends BaseEntityBlock {
                     DataBusConnection other = nextState.getValue(getPropertyForDirection(dir.getOpposite()));
                     if (!side.isConnected(other)) continue;
                     if (network.size() < MAX_NETWORK && network.add(next)) queue.add(next);
-                } else if (nextState.is(ModTags.DIGITAL_BLOCKS)) {
-                    ValueSource src = ValueSourceProvider.find(level, next, dir.getOpposite());
-                    if (src != null) value = Math.max(value, src.value());
+                } else {
+                    DataValueOutput out = DataValueLookup.findOutput(level, next, dir.getOpposite());
+                    if (out != null) value = Math.max(value, out.getValue());
                 }
             }
         }
@@ -165,9 +167,9 @@ public class DataBusBlock extends BaseEntityBlock {
                 for (Direction dir : Direction.values()) {
                     if (busState.getValue(getPropertyForDirection(dir)) != DataBusConnection.CONNECTED) continue;
                     BlockPos n = p.relative(dir);
-                    if (!level.getBlockState(n).is(ModBlocks.DATA_BUS.get())) {
-                        level.neighborChanged(n, this, p);
-                    }
+                    if (level.getBlockState(n).is(ModBlocks.DATA_BUS.get())) continue;
+                    DataValueInput input = DataValueLookup.findInput(level, n, dir.getOpposite());
+                    if (input != null) input.onInputChanged();
                 }
             }
         }

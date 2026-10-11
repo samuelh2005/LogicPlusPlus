@@ -1,7 +1,0 @@
-{
-    "replace": false,
-    "values": [
-        "logic_plus_plus:data_bus",
-        "logic_plus_plus:counter"
-    ]
-}
