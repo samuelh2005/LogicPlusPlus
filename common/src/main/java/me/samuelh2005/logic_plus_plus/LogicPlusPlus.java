@@ -3,6 +3,8 @@ package me.samuelh2005.logic_plus_plus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import dev.architectury.registry.client.rendering.BlockEntityRendererRegistry;
+import me.samuelh2005.logic_plus_plus.content.digital_display.DigitalDisplayRenderer;
 import me.samuelh2005.logic_plus_plus.foundation.ModBlockEntities;
 import me.samuelh2005.logic_plus_plus.foundation.ModBlocks;
 import me.samuelh2005.logic_plus_plus.foundation.ModCreativeTabs;
@@ -20,6 +22,10 @@ public final class LogicPlusPlus {
         ModItems.register();
         ModNetworking.register();
 
-        LOGGER.info("Logic++ has been initialized!");
+        LOGGER.info("Logic Plus Plus has been initialized!");
+    }
+
+    public static void initClient() {
+        BlockEntityRendererRegistry.register(ModBlockEntities.DIGITAL_DISPLAY.get(), DigitalDisplayRenderer::new);
     }
 }

@@ -4,6 +4,7 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
 import me.samuelh2005.logic_plus_plus.LogicPlusPlus;
 import me.samuelh2005.logic_plus_plus.data.DataBlockEntity;
@@ -16,6 +17,12 @@ public final class LogicPlusPlusNeoForge {
         // Run our common setup.
         LogicPlusPlus.init();
         modBus.addListener(LogicPlusPlusNeoForge::registerCaps);
+        modBus.addListener(LogicPlusPlusNeoForge::clientSetup);
+    }
+
+    @SubscribeEvent
+    public static void clientSetup(FMLClientSetupEvent event) {
+        LogicPlusPlus.initClient();
     }
 
     @SubscribeEvent
