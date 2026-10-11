@@ -1,17 +1,19 @@
 package me.samuelh2005.logic_plus_plus.neoforge;
 
+import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
 import me.samuelh2005.logic_plus_plus.LogicPlusPlus;
 import me.samuelh2005.logic_plus_plus.foundation.ModBlockEntities;
-import me.samuelh2005.logic_plus_plus.neoforge.systems.ValueSourceProviderImpl;
+import me.samuelh2005.logic_plus_plus.systems.neoforge.ValueSourceProviderImpl;
 
 @Mod(LogicPlusPlus.MOD_ID)
 public final class LogicPlusPlusNeoForge {
-    public LogicPlusPlusNeoForge() {
+    public LogicPlusPlusNeoForge(IEventBus modBus) {
         // Run our common setup.
         LogicPlusPlus.init();
+        modBus.addListener(LogicPlusPlusNeoForge::registerCaps);
     }
 
     @SubscribeEvent

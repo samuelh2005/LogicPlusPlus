@@ -3,8 +3,8 @@ package me.samuelh2005.logic_plus_plus.fabric;
 import net.fabricmc.api.ModInitializer;
 
 import me.samuelh2005.logic_plus_plus.LogicPlusPlus;
-import me.samuelh2005.logic_plus_plus.fabric.systems.ValueSourceProviderImpl;
 import me.samuelh2005.logic_plus_plus.foundation.ModBlockEntities;
+import me.samuelh2005.logic_plus_plus.systems.fabric.ValueSourceProviderImpl;
 
 public final class LogicPlusPlusFabric implements ModInitializer {
     @Override
