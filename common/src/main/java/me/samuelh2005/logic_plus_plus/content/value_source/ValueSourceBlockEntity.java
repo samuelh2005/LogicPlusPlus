@@ -31,6 +31,12 @@ public class ValueSourceBlockEntity extends DataBlockEntity {
         value = tag.getInt("value");
     }
 
+    public void setValue(int value) {
+        this.value = value;
+        setChanged();
+        notifyOutputs();
+    }
+
     public int getValue() {
         return value;
     }

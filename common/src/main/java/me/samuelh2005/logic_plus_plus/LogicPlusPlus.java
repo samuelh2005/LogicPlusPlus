@@ -7,6 +7,7 @@ import me.samuelh2005.logic_plus_plus.foundation.ModBlockEntities;
 import me.samuelh2005.logic_plus_plus.foundation.ModBlocks;
 import me.samuelh2005.logic_plus_plus.foundation.ModCreativeTabs;
 import me.samuelh2005.logic_plus_plus.foundation.ModItems;
+import me.samuelh2005.logic_plus_plus.foundation.ModNetworking;
 
 public final class LogicPlusPlus {
     public static final String MOD_ID = "logic_plus_plus";
@@ -17,6 +18,7 @@ public final class LogicPlusPlus {
         ModBlockEntities.register();
         ModCreativeTabs.register();
         ModItems.register();
+        ModNetworking.register();
 
         LOGGER.info("Logic++ has been initialized!");
     }
